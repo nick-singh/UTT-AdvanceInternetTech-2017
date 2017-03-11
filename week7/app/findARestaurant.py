@@ -22,53 +22,59 @@ def getGeocodeLocation(inputString):
     longitude = result['results'][0]['geometry']['location']['lng']
     return (latitude,longitude)
 
+
+def get_venue_menu(venue_id):
+    h = httplib2.Http()
+    #default image url
+    imageURL = "http://runawayapricot.com/wp-content/uploads/2014/09/placeholder.jpg"
+    url = ('https://api.foursquare.com/v2/venues/%s/menu?client_id=%s&v=20150603&client_secret=%s' % ((venue_id,foursquare_client_id,foursquare_client_secret)))
+    result = json.loads(h.request(url,'GET')[1])
+    print result
+
+def get_venue_image(venue_id):
+    h = httplib2.Http()
+    #default image url
+    imageURL = "http://runawayapricot.com/wp-content/uploads/2014/09/placeholder.jpg"
+    #Get a  300x300 picture of the restaurant using the venue_id (you can change this by altering the 300x300 value in the URL or replacing it with 'orginal' to get the original picture
+    url = ('https://api.foursquare.com/v2/venues/%s/photos?client_id=%s&v=20150603&client_secret=%s' % ((venue_id,foursquare_client_id,foursquare_client_secret)))
+    print url
+    result = json.loads(h.request(url,'GET')[1])
+    #Grab the first image
+    #if no image available, insert default image url
+    if result['response']['photos']['items']:
+        firstpic = result['response']['photos']['items'][0]
+        prefix = firstpic['prefix']
+        suffix = firstpic['suffix']
+        imageURL = prefix + "300x300" + suffix
+    return imageURL
+        
+
 #This function takes in a string representation of a location and cuisine type, geocodes the location, and then pass in the latitude and longitude coordinates to the Foursquare API
 def findARestaurant(mealType, location):
     latitude, longitude = getGeocodeLocation(location)
     url = ('https://api.foursquare.com/v2/venues/search?client_id=%s&client_secret=%s&v=20130815&ll=%s,%s&query=%s' % (foursquare_client_id, foursquare_client_secret,latitude,longitude,mealType))
     h = httplib2.Http()
     result = json.loads(h.request(url,'GET')[1])
+    # if we have a valid response
     if result['response']['venues']:
-
         rest = []
+        # for all restaurants that were returned
         for restaurant in result['response']['venues']:
+            # get the restaurant id
             venue_id = restaurant['id'] 
+            # get the restaurant name
             restaurant_name = restaurant['name']
+            #  get the restaurant address
             restaurant_address = restaurant['location']['formattedAddress']
             #Format the Restaurant Address into one string
             address = ""
             for i in restaurant_address:
                 address += i + " "
             restaurant_address = address
-            
-            #Get a  300x300 picture of the restaurant using the venue_id (you can change this by altering the 300x300 value in the URL or replacing it with 'orginal' to get the original picture
-            url = ('https://api.foursquare.com/v2/venues/%s/photos?client_id=%s&v=20150603&client_secret=%s' % ((venue_id,foursquare_client_id,foursquare_client_secret)))
-            result = json.loads(h.request(url,'GET')[1])
-            #Grab the first image
-            #if no image available, insert default image url
-            if result['response']['photos']['items']:
-                firstpic = result['response']['photos']['items'][0]
-                prefix = firstpic['prefix']
-                suffix = firstpic['suffix']
-                imageURL = prefix + "300x300" + suffix
-            else:
-                imageURL = "http://runawayapricot.com/wp-content/uploads/2014/09/placeholder.jpg"
-
-            restaurantInfo = {'name':restaurant_name, 'address':restaurant_address, 'image':imageURL}
+            imageURL = get_venue_image(venue_id)
+            restaurantInfo = {'name':restaurant_name, 'address':restaurant_address, 'image':imageURL, 'venue_id':venue_id}
             rest.append(restaurantInfo)            
         return rest
     else:
         #print "No Restaurants Found for %s" % location
         return {"message":"No Restaurants Found"}
-
-
-if __name__ == '__main__':
-    print findARestaurant("sushi", "chaguanas")
-    # findARestaurant("Tacos", "Jakarta, Indonesia")
-    # findARestaurant("Tapas", "Maputo, Mozambique")
-    # findARestaurant("Falafel", "Cairo, Egypt")
-    # findARestaurant("Spaghetti", "New Delhi, India")
-    # findARestaurant("Cappuccino", "Geneva, Switzerland") 
-    # findARestaurant("Sushi", "Los Angeles, California")
-    # findARestaurant("Steak", "La Paz, Bolivia")
-    # findARestaurant("Gyros", "Sydney Austrailia")        

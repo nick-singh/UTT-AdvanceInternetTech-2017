@@ -26,4 +26,4 @@ def findAResturant(mealType, location):
 	result = json.loads(content)
 	return result
 
-print json.dumps(findAResturant("pizza","Chaguanas"))
+# print json.dumps(findAResturant("pizza","Chaguanas"))

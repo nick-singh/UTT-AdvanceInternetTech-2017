@@ -18,6 +18,7 @@ def loadData(filename):
 
 # # this funcation parses the data and displays it in a readable format
 def readData(data):
+	
 	for item in data['transactions']['transaction']:
 		print item['date'], item['id']
 		print item['from']['account']
@@ -26,5 +27,4 @@ def readData(data):
 		print item['amount']['value']
 
 transactions = loadData('transactions.json')
-
 readData(transactions)

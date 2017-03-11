@@ -37,13 +37,13 @@ def all_restaurants_handler():
     location = request.json['location']
     mealType = request.json['mealType']    
     restaurant_info = findARestaurant(mealType, location)
-    if restaurant_info != "No Restaurants Found":
-      restaurant = Restaurant(restaurant_name = unicode(restaurant_info['name']), restaurant_address = unicode(restaurant_info['address']), restaurant_image = restaurant_info['image'])
-      session.add(restaurant)
-      session.commit() 
-      return jsonify(restaurant = restaurant.serialize)
-    else:
-      return jsonify({"error":"No Restaurants Found for %s in %s" % (mealType, location)})
+    # if restaurant_info != "No Restaurants Found":
+    #   restaurant = Restaurant(restaurant_name = unicode(restaurant_info['name']), restaurant_address = unicode(restaurant_info['address']), restaurant_image = restaurant_info['image'])
+    #   session.add(restaurant)
+    #   session.commit() 
+    return jsonify(restaurant = restaurant_info)
+    # else:
+    #   return jsonify({"error":"No Restaurants Found for %s in %s" % (mealType, location)})
 
 
     
